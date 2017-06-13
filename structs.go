@@ -47,3 +47,8 @@ type Connections struct {
 	Guilds   []*discordgo.Guild
 	Channels []*discordgo.Channel
 }
+
+// User contains user data.
+type User struct {
+	*discordgo.User
+}

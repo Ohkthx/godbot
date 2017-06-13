@@ -69,7 +69,7 @@ func (bot *Core) Start() error {
 
 // Stop shuts down the bot.
 func (bot *Core) Stop() error {
-	bot.Unlock()
+	//bot.Unlock()
 	bot.session.Close()
 	return nil
 }

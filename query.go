@@ -11,6 +11,7 @@ var (
 	ErrNilGuilds   = errors.New("bot.guilds is nil")
 	ErrNilChannels = errors.New("bot.channels is nil")
 	ErrNilLinks    = errors.New("bot.links is nil")
+	ErrNotFound    = errors.New("not found")
 )
 
 // Codes for types of Connections.
@@ -184,12 +185,15 @@ func (bot *Core) queryPrivate() error {
 	return nil
 }
 
-func (bot *Core) getMainChannel(gID string) *discordgo.Channel {
-	c := bot.links[gID]
-	for _, p := range c {
-		if p.ID == gID {
-			return p
-		}
+// ConnectionsReset sets the defaults for the bots connections.
+func (bot *Core) ConnectionsReset() error {
+	err := bot.UpdateConnections()
+	if err != nil {
+		return err
 	}
+
+	bot.guildMain = bot.guilds[0]
+	bot.channelMain = bot.getMainChannel(bot.guildMain.ID)
+
 	return nil
 }

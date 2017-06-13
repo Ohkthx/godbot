@@ -1,1 +1,7 @@
+0.1.1 - Additions:
+            - QOL functions for accessing private data.
+        Fixes:
+            - Auto-generated MIT License name field fixed.
+            - sync.Mutex.Unlock bug on godbot.Stop() function printing extensive information. Commented out.
+
 0.1.0 - Initial release
