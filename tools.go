@@ -23,3 +23,23 @@ func (bot *Core) SetMainChannel(gID, cID string) error {
 	}
 	return ErrNotFound
 }
+
+// GetChannel gets a Channel struct based on Channel ID.
+func (bot *Core) GetChannel(cID string) *Channel {
+	for _, p := range bot.Channels {
+		if p.ID == cID {
+			return &Channel{Channel: p}
+		}
+	}
+	return nil
+}
+
+// GetGuild gets a Guild structure from a Guild ID.
+func (bot *Core) GetGuild(gID string) *Guild {
+	for _, p := range bot.Guilds {
+		if p.ID == gID {
+			return &Guild{Guild: p}
+		}
+	}
+	return nil
+}
