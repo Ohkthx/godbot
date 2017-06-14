@@ -24,13 +24,13 @@ type Core struct {
 
 	// Connection Information.
 	session     *discordgo.Session
-	channelMain *discordgo.Channel
-	channels    []*discordgo.Channel
-	guildMain   *discordgo.Guild
-	guilds      []*discordgo.Guild
+	ChannelMain *discordgo.Channel
+	Channels    []*discordgo.Channel
+	GuildMain   *discordgo.Guild
+	Guilds      []*discordgo.Guild
 
-	links   map[string][]*discordgo.Channel
-	private []*discordgo.Channel
+	Links   map[string][]*discordgo.Channel
+	Private []*discordgo.Channel
 
 	// Message handling function.
 	mhAssigned bool
@@ -48,7 +48,21 @@ type Connections struct {
 	Channels []*discordgo.Channel
 }
 
+/*
+Discordgo datatype Wrappers
+*/
+
 // User contains user data.
 type User struct {
 	*discordgo.User
+}
+
+// Guild contains guild data.
+type Guild struct {
+	*discordgo.Guild
+}
+
+// Channel contains channel data.
+type Channel struct {
+	*discordgo.Channel
 }

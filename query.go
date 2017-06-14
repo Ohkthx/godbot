@@ -29,7 +29,7 @@ func (bot *Core) GetConnections() (*Connections, error) {
 		return nil, err
 	}
 
-	return &Connections{Links: bot.links, Guilds: bot.guilds, Channels: bot.channels}, nil
+	return &Connections{Links: bot.Links, Guilds: bot.Guilds, Channels: bot.Channels}, nil
 
 }
 
@@ -71,20 +71,20 @@ func (bot *Core) updateConnections(toUpdate int) error {
 func (bot *Core) queryLinks() error {
 	s := bot.session
 
-	if bot.guilds == nil {
+	if bot.Guilds == nil {
 		return ErrNilGuilds
-	} else if bot.links == nil {
-		bot.links = make(map[string][]*discordgo.Channel)
+	} else if bot.Links == nil {
+		bot.Links = make(map[string][]*discordgo.Channel)
 	}
 
-	for _, g := range bot.guilds {
-		if _, ok := bot.links[g.ID]; ok == false {
+	for _, g := range bot.Guilds {
+		if _, ok := bot.Links[g.ID]; ok == false {
 			c, err := s.GuildChannels(g.ID)
 			if err != nil {
 				return err
 			}
 
-			bot.links[g.ID] = c
+			bot.Links[g.ID] = c
 		}
 	}
 
@@ -108,8 +108,8 @@ func (bot *Core) queryGuilds() error {
 			return err
 		}
 		in = false
-		if bot.guilds != nil {
-			for _, t := range bot.guilds {
+		if bot.Guilds != nil {
+			for _, t := range bot.Guilds {
 				if t.ID == guild.ID {
 					in = true
 					break
@@ -117,7 +117,7 @@ func (bot *Core) queryGuilds() error {
 			}
 		}
 		if in == false {
-			bot.guilds = append(bot.guilds, guild)
+			bot.Guilds = append(bot.Guilds, guild)
 		}
 	}
 
@@ -129,11 +129,11 @@ func (bot *Core) queryChannels() error {
 	var in bool
 	s := bot.session
 
-	if bot.guilds == nil {
+	if bot.Guilds == nil {
 		return ErrNilGuilds
 	}
 
-	for _, g := range bot.guilds {
+	for _, g := range bot.Guilds {
 		channels, err := s.GuildChannels(g.ID)
 		if err != nil {
 			return err
@@ -141,8 +141,8 @@ func (bot *Core) queryChannels() error {
 
 		for _, c := range channels {
 			in = false
-			if bot.channels != nil {
-				for _, t := range bot.channels {
+			if bot.Channels != nil {
+				for _, t := range bot.Channels {
 					if c.ID == t.ID {
 						in = true
 						break
@@ -150,7 +150,7 @@ func (bot *Core) queryChannels() error {
 				}
 			}
 			if in == false {
-				bot.channels = append(bot.channels, c)
+				bot.Channels = append(bot.Channels, c)
 			}
 		}
 	}
@@ -169,8 +169,8 @@ func (bot *Core) queryPrivate() error {
 	if len(private) > 0 {
 		for _, p := range private {
 			in = false
-			if bot.private != nil {
-				for _, t := range bot.private {
+			if bot.Private != nil {
+				for _, t := range bot.Private {
 					if t.ID == p.ID {
 						in = true
 						break
@@ -178,7 +178,7 @@ func (bot *Core) queryPrivate() error {
 				}
 			}
 			if in == false {
-				bot.private = append(bot.private, p)
+				bot.Private = append(bot.Private, p)
 			}
 		}
 	}
@@ -192,8 +192,8 @@ func (bot *Core) ConnectionsReset() error {
 		return err
 	}
 
-	bot.guildMain = bot.guilds[0]
-	bot.channelMain = bot.getMainChannel(bot.guildMain.ID)
+	bot.GuildMain = bot.Guilds[0]
+	bot.ChannelMain = bot.getMainChannel(bot.GuildMain.ID)
 
 	return nil
 }
