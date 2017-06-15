@@ -69,7 +69,7 @@ func (bot *Core) updateConnections(toUpdate int) error {
 
 // queryLinks creates the map with [guild] -> [channels]
 func (bot *Core) queryLinks() error {
-	s := bot.session
+	s := bot.Session
 
 	if bot.Guilds == nil {
 		return ErrNilGuilds
@@ -95,7 +95,7 @@ func (bot *Core) queryLinks() error {
 func (bot *Core) queryGuilds() error {
 	var in bool
 	var err error
-	s := bot.session
+	s := bot.Session
 
 	guilds, err := s.UserGuilds(100, "", "")
 	if err != nil {
@@ -127,7 +127,7 @@ func (bot *Core) queryGuilds() error {
 // queryChannels just updates the core.channels slices with current guilds.
 func (bot *Core) queryChannels() error {
 	var in bool
-	s := bot.session
+	s := bot.Session
 
 	if bot.Guilds == nil {
 		return ErrNilGuilds
@@ -159,7 +159,7 @@ func (bot *Core) queryChannels() error {
 
 func (bot *Core) queryPrivate() error {
 	var in bool
-	s := bot.session
+	s := bot.Session
 
 	private, err := s.UserChannels()
 	if err != nil {

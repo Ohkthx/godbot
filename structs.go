@@ -23,7 +23,7 @@ type Core struct {
 	Game   string
 
 	// Connection Information.
-	session     *discordgo.Session
+	Session     *discordgo.Session
 	ChannelMain *discordgo.Channel
 	Channels    []*discordgo.Channel
 	GuildMain   *discordgo.Guild

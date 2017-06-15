@@ -1,5 +1,6 @@
 0.1.2 - Additions:
             - QOL functions for easier access to guild/channel objects.
+            - Exported *discordgo.Session
 
 0.1.1 - Additions:
             - QOL functions for accessing private data.

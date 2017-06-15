@@ -41,18 +41,18 @@ func (bot *Core) Start() error {
 		return err
 	}
 
-	bot.session, err = discordgo.New("Bot " + bot.Token)
+	bot.Session, err = discordgo.New("Bot " + bot.Token)
 	if err != nil {
 		return err
 	}
 
 	// Ready callback for when application is ready.
-	bot.session.AddHandler(bot.ready)
+	bot.Session.AddHandler(bot.ready)
 
 	// Message handler for CreateMessage
-	bot.session.AddHandler(bot.mh)
+	bot.Session.AddHandler(bot.mh)
 
-	err = bot.session.Open()
+	err = bot.Session.Open()
 	if err != nil {
 		bot.errorlog(err)
 		bot.Stop()
@@ -71,7 +71,7 @@ func (bot *Core) Start() error {
 // Stop shuts down the bot.
 func (bot *Core) Stop() error {
 	//bot.Unlock()
-	bot.session.Close()
+	bot.Session.Close()
 	return nil
 }
 
