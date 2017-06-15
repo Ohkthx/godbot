@@ -43,3 +43,18 @@ func (bot *Core) GetGuild(gID string) *Guild {
 	}
 	return nil
 }
+
+// GetGuildID gets the ID of a guild from a Channel ID.
+func (bot *Core) GetGuildID(cID string) (string, error) {
+	if bot.Links == nil {
+		return "", ErrNilLinks
+	}
+	for guild, channels := range bot.Links {
+		for _, c := range channels {
+			if c.ID == cID {
+				return guild, nil
+			}
+		}
+	}
+	return "", ErrNotFound
+}

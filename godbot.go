@@ -92,6 +92,9 @@ func (bot *Core) ready(s *discordgo.Session, event *discordgo.Ready) {
 		return
 	}
 
+	bot.GuildMain = bot.Guilds[0]
+	bot.ChannelMain = bot.getMainChannel(bot.GuildMain.ID)
+
 	if bot.Game != "" {
 		err = s.UpdateStatus(0, bot.Game)
 		if err != nil {
