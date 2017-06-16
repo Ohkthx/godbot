@@ -2,6 +2,7 @@ package godbot
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -10,6 +11,8 @@ import (
 var (
 	ErrChannelNotLocked = errors.New("channel is not locked")
 	ErrChannelLocked    = errors.New("channel is locked")
+	ErrNilChannelLock   = errors.New("provided a nil channel lock")
+	ErrBadChannel       = errors.New("bad channel for operation")
 )
 
 // getMainChannel sets the main channel for the bot.
@@ -81,24 +84,40 @@ func (bot *Core) GetGuildID(cID string) (string, error) {
 func (bot *Core) ChannelLockCreate(cID string) (*ChannelLock, error) {
 	s := bot.Session
 	var cl = &ChannelLock{}
+	//var f bool
 
 	cl.Session = s
 	cl.Channel = bot.GetChannel(cID)
 	cl.Guild = bot.GetGuild(cl.Channel.GuildID)
+
+	if cl.Channel.Type != "text" {
+		return nil, ErrBadChannel
+	}
+
 	for _, p := range cl.Channel.PermissionOverwrites {
+		cl.Overwrites = append(cl.Overwrites, p)
 		r, err := s.State.Role(cl.Guild.ID, p.ID)
 		if err != nil {
 			return nil, err
 		}
 
-		if r.Name == "@everyone" {
+		cl.Roles = append(cl.Roles, r)
+	}
+
+	/*
+		if strings.ToLower(r.Name) == "@everyone" {
+			f = true
 			cl.Role = r
 			cl.Allow = p.Allow
 			cl.Deny = p.Deny
 			cl.Permissions = r.Permissions
 			cl.Type = p.Type
+			return cl, nil
 		}
-	}
+		if f != true {
+			return nil, ErrNotFound
+		}
+	*/
 
 	return cl, nil
 
@@ -108,20 +127,48 @@ func (bot *Core) ChannelLockCreate(cID string) (*ChannelLock, error) {
 func (cl *ChannelLock) ChannelLock() error {
 	//var timeoutRole, everyoneRole, everyoneRoleBak *discordgo.Role
 	// Get current Roles permissions.
+	if cl == nil {
+		return ErrNilChannelLock
+	}
 	if cl.Locked {
 		return nil
 	}
 
 	s := cl.Session
-	nA := cl.Allow
-	if cl.Allow&2048 == 2048 {
-		nA = cl.Allow ^ 2048
+	for _, ow := range cl.Overwrites {
+		r, err := cl.overwriteRole(ow.ID)
+		if err != nil {
+			fmt.Println("getting role from overwrite id", err)
+			continue
+		}
+
+		nA := ow.Allow
+		if ow.Allow&2048 == 2048 {
+			nA = ow.Allow ^ 2048
+		}
+
+		err = s.ChannelPermissionSet(cl.Channel.ID, r.ID, ow.Type, nA, ow.Deny|2048)
+		if err != nil {
+			return err
+		}
 	}
 
-	err := s.ChannelPermissionSet(cl.Channel.ID, cl.Role.ID, cl.Type, nA, cl.Deny|2048)
+	d := fmt.Sprintf("**%s** channel is temporarily __**locked**__ for maintenance.\n%4s message will disappear when it is available.", cl.Channel.Name, "This")
+	// Embed create.
+	em := &discordgo.MessageEmbed{
+		Author:      &discordgo.MessageEmbedAuthor{},
+		Color:       0x800000,
+		Description: d,
+		Fields:      []*discordgo.MessageEmbedField{},
+	}
+
+	var err error
+	cl.Message, err = s.ChannelMessageSendEmbed(cl.Channel.ID, em)
 	if err != nil {
 		return err
 	}
+	// End Embed send.
+
 	cl.Locked = true
 	return nil
 }
@@ -133,10 +180,34 @@ func (cl *ChannelLock) ChannelUnlock() error {
 	}
 
 	s := cl.Session
-	err := s.ChannelPermissionSet(cl.Channel.ID, cl.Role.ID, cl.Type, cl.Allow, cl.Deny)
-	if err != nil {
-		return err
+	for _, ow := range cl.Overwrites {
+		r, err := cl.overwriteRole(ow.ID)
+		if err != nil {
+			fmt.Println("getting role from overwrite id", err)
+			continue
+		}
+
+		err = s.ChannelPermissionSet(cl.Channel.ID, r.ID, ow.Type, ow.Allow, ow.Deny)
+		if err != nil {
+			return err
+		}
+	}
+
+	if cl.Message != nil {
+		err := s.ChannelMessageDelete(cl.Channel.ID, cl.Message.ID)
+		if err != nil {
+			return err
+		}
 	}
 	cl.Locked = false
 	return nil
+}
+
+func (cl *ChannelLock) overwriteRole(oID string) (*discordgo.Role, error) {
+	for _, r := range cl.Roles {
+		if r.ID == oID {
+			return r, nil
+		}
+	}
+	return nil, ErrNotFound
 }

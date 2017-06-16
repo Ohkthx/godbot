@@ -69,13 +69,15 @@ type Channel struct {
 
 // ChannelLock holds Locking information for a Channel.
 type ChannelLock struct {
-	Locked      bool
-	Session     *discordgo.Session
-	Guild       *Guild
-	Channel     *Channel
-	Role        *discordgo.Role
-	Type        string
-	Allow       int
-	Deny        int
-	Permissions int
+	Locked     bool
+	Session    *discordgo.Session
+	Guild      *Guild
+	Channel    *Channel
+	Roles      []*discordgo.Role
+	Overwrites []*discordgo.PermissionOverwrite
+	Message    *discordgo.Message
+	//Type        string
+	//Allow       int
+	//Deny        int
+	//Permissions int
 }
