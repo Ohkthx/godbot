@@ -66,3 +66,16 @@ type Guild struct {
 type Channel struct {
 	*discordgo.Channel
 }
+
+// ChannelLock holds Locking information for a Channel.
+type ChannelLock struct {
+	Locked      bool
+	Session     *discordgo.Session
+	Guild       *Guild
+	Channel     *Channel
+	Role        *discordgo.Role
+	Type        string
+	Allow       int
+	Deny        int
+	Permissions int
+}

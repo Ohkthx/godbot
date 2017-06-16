@@ -1,6 +1,16 @@
 package godbot
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"errors"
+
+	"github.com/bwmarrin/discordgo"
+)
+
+// Constants for locked channels.
+var (
+	ErrChannelNotLocked = errors.New("channel is not locked")
+	ErrChannelLocked    = errors.New("channel is locked")
+)
 
 // getMainChannel sets the main channel for the bot.
 func (bot *Core) getMainChannel(gID string) *discordgo.Channel {
@@ -22,6 +32,14 @@ func (bot *Core) SetMainChannel(gID, cID string) error {
 		}
 	}
 	return ErrNotFound
+}
+
+// SetMainGuild assigns the guild and channel to the main server.
+func (bot *Core) SetMainGuild(gID string) {
+	g := bot.GetGuild(gID)
+	c := bot.GetChannel(gID)
+	bot.GuildMain = g.Guild
+	bot.ChannelMain = c.Channel
 }
 
 // GetChannel gets a Channel struct based on Channel ID.
@@ -57,4 +75,68 @@ func (bot *Core) GetGuildID(cID string) (string, error) {
 		}
 	}
 	return "", ErrNotFound
+}
+
+// ChannelLockCreate returns a ChannelLock struct.
+func (bot *Core) ChannelLockCreate(cID string) (*ChannelLock, error) {
+	s := bot.Session
+	var cl = &ChannelLock{}
+
+	cl.Session = s
+	cl.Channel = bot.GetChannel(cID)
+	cl.Guild = bot.GetGuild(cl.Channel.GuildID)
+	for _, p := range cl.Channel.PermissionOverwrites {
+		r, err := s.State.Role(cl.Guild.ID, p.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		if r.Name == "@everyone" {
+			cl.Role = r
+			cl.Allow = p.Allow
+			cl.Deny = p.Deny
+			cl.Permissions = r.Permissions
+			cl.Type = p.Type
+		}
+	}
+
+	return cl, nil
+
+}
+
+// ChannelLock will lock a channel preventing @everyone typing.
+func (cl *ChannelLock) ChannelLock() error {
+	//var timeoutRole, everyoneRole, everyoneRoleBak *discordgo.Role
+	// Get current Roles permissions.
+	if cl.Locked {
+		return nil
+	}
+
+	s := cl.Session
+	nA := cl.Allow
+	if cl.Allow&2048 == 2048 {
+		nA = cl.Allow ^ 2048
+	}
+
+	err := s.ChannelPermissionSet(cl.Channel.ID, cl.Role.ID, cl.Type, nA, cl.Deny|2048)
+	if err != nil {
+		return err
+	}
+	cl.Locked = true
+	return nil
+}
+
+// ChannelUnlock will unlock a channel allowing for @everyone to type.
+func (cl *ChannelLock) ChannelUnlock() error {
+	if cl.Locked != true {
+		return ErrChannelNotLocked
+	}
+
+	s := cl.Session
+	err := s.ChannelPermissionSet(cl.Channel.ID, cl.Role.ID, cl.Type, cl.Allow, cl.Deny)
+	if err != nil {
+		return err
+	}
+	cl.Locked = false
+	return nil
 }
