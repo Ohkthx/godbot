@@ -2,6 +2,9 @@
             - ChannelLocking and Unlocking of all roles.
             - SetMainGuild QOL function added. Sets GuildMain and ChannelMain
             - Set bot user name, append abilities.
+        Fixes:
+            - Channel locking "alert" as to if it should notify channel it is locked.
+            - Printing errors that can't be handled from defered ChannelUnlock.
 
 0.1.2 - Additions:
             - QOL functions for easier access to guild/channel objects.

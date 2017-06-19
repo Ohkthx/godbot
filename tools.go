@@ -125,7 +125,7 @@ func (bot *Core) ChannelLockCreate(cID string) (*ChannelLock, error) {
 }
 
 // ChannelLock will lock a channel preventing @everyone typing.
-func (cl *ChannelLock) ChannelLock() error {
+func (cl *ChannelLock) ChannelLock(alert bool) error {
 	//var timeoutRole, everyoneRole, everyoneRoleBak *discordgo.Role
 	// Get current Roles permissions.
 	if cl == nil {
@@ -154,21 +154,23 @@ func (cl *ChannelLock) ChannelLock() error {
 		}
 	}
 
-	d := fmt.Sprintf("**%s** channel is temporarily __**locked**__ for maintenance.\n%4s message will disappear when it is available.", cl.Channel.Name, "This")
-	// Embed create.
-	em := &discordgo.MessageEmbed{
-		Author:      &discordgo.MessageEmbedAuthor{},
-		Color:       0x800000,
-		Description: d,
-		Fields:      []*discordgo.MessageEmbedField{},
-	}
+	if alert {
+		d := fmt.Sprintf("**%s** channel is temporarily __**locked**__ for maintenance.\n%4s message will disappear when it is available.", cl.Channel.Name, "This")
 
-	var err error
-	cl.Message, err = s.ChannelMessageSendEmbed(cl.Channel.ID, em)
-	if err != nil {
-		return err
+		// Embed create.
+		em := &discordgo.MessageEmbed{
+			Author:      &discordgo.MessageEmbedAuthor{},
+			Color:       0x800000,
+			Description: d,
+			Fields:      []*discordgo.MessageEmbedField{},
+		}
+		var err error
+		cl.Message, err = s.ChannelMessageSendEmbed(cl.Channel.ID, em)
+		if err != nil {
+			return err
+		}
+		// End Embed send.
 	}
-	// End Embed send.
 
 	cl.Locked = true
 	return nil
@@ -190,6 +192,7 @@ func (cl *ChannelLock) ChannelUnlock() error {
 
 		err = s.ChannelPermissionSet(cl.Channel.ID, r.ID, ow.Type, ow.Allow, ow.Deny)
 		if err != nil {
+			fmt.Printf("[ERROR] Could not unlock!\n Channel: %s -> Role: %s, ID: %s\n Overwrite Dump: %#v", cl.Channel.Name, r.Name, r.ID, ow)
 			return err
 		}
 	}
