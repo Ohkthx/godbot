@@ -13,6 +13,7 @@ var (
 	ErrChannelLocked    = errors.New("channel is locked")
 	ErrNilChannelLock   = errors.New("provided a nil channel lock")
 	ErrBadChannel       = errors.New("bad channel for operation")
+	ErrBadGuild         = errors.New("bad guild for operation")
 )
 
 // getMainChannel sets the main channel for the bot.
@@ -210,4 +211,23 @@ func (cl *ChannelLock) overwriteRole(oID string) (*discordgo.Role, error) {
 		}
 	}
 	return nil, ErrNotFound
+}
+
+// SetNickname will set the current name of the bot to the guild.
+func (bot *Core) SetNickname(gID, name string, append bool) error {
+	s := bot.Session
+	if gID == "" {
+		return ErrBadGuild
+	}
+
+	if append {
+		name = fmt.Sprintf("%s %s", bot.Username, name)
+	}
+
+	err := s.GuildMemberNickname(gID, bot.User.ID, name)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
