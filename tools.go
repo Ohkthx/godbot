@@ -16,8 +16,8 @@ var (
 	ErrBadGuild         = errors.New("bad guild for operation")
 )
 
-// getMainChannel sets the main channel for the bot.
-func (bot *Core) getMainChannel(gID string) *discordgo.Channel {
+// GetMainChannel sets the main channel for the bot.
+func (bot *Core) GetMainChannel(gID string) *discordgo.Channel {
 	c := bot.Links[gID]
 	for _, p := range c {
 		if p.ID == gID {

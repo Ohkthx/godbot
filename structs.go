@@ -33,8 +33,10 @@ type Core struct {
 	Private []*discordgo.Channel
 
 	// Message handling function.
-	mhAssigned bool
-	mh         func(*discordgo.Session, *discordgo.MessageCreate)
+	mhAssigned  bool
+	uahAssigned bool
+	mh          func(*discordgo.Session, *discordgo.MessageCreate)
+	uah         func(*discordgo.Session, *discordgo.GuildMemberAdd)
 
 	// Logging for Errors.
 	muLog  sync.Mutex

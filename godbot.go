@@ -26,6 +26,12 @@ func (bot *Core) MessageHandler(msgHandler func(*discordgo.Session, *discordgo.M
 	bot.mhAssigned = true
 }
 
+// NewUserHandler assigns a function to deal with newly joining users.
+func (bot *Core) NewUserHandler(userHandler func(*discordgo.Session, *discordgo.GuildMemberAdd)) {
+	bot.uah = userHandler
+	bot.uahAssigned = true
+}
+
 // Start initiates the bot, attempts to connect to Discord.
 func (bot *Core) Start() error {
 	var err error
@@ -51,6 +57,15 @@ func (bot *Core) Start() error {
 
 	// Message handler for CreateMessage
 	bot.Session.AddHandler(bot.mh)
+
+	// Handlers for channel changes
+	bot.Session.AddHandler(bot.channelCreated)
+	bot.Session.AddHandler(bot.channelDeleted)
+	bot.Session.AddHandler(bot.channelUpdated)
+
+	if bot.uahAssigned {
+		bot.Session.AddHandler(bot.uah)
+	}
 
 	err = bot.Session.Open()
 	if err != nil {
@@ -93,7 +108,7 @@ func (bot *Core) ready(s *discordgo.Session, event *discordgo.Ready) {
 	}
 
 	bot.GuildMain = bot.Guilds[0]
-	bot.ChannelMain = bot.getMainChannel(bot.GuildMain.ID)
+	bot.ChannelMain = bot.GetMainChannel(bot.GuildMain.ID)
 
 	if bot.Game != "" {
 		err = s.UpdateStatus(0, bot.Game)
@@ -104,6 +119,30 @@ func (bot *Core) ready(s *discordgo.Session, event *discordgo.Ready) {
 	}
 
 	bot.done = true
+}
+
+func (bot *Core) channelCreated(s *discordgo.Session, cc *discordgo.ChannelCreate) {
+	err := bot.UpdateConnections()
+	if err != nil {
+		bot.errorlog(err)
+		return
+	}
+}
+
+func (bot *Core) channelDeleted(s *discordgo.Session, cd *discordgo.ChannelDelete) {
+	err := bot.UpdateConnections()
+	if err != nil {
+		bot.errorlog(err)
+		return
+	}
+}
+
+func (bot *Core) channelUpdated(s *discordgo.Session, cu *discordgo.ChannelUpdate) {
+	err := bot.UpdateConnections()
+	if err != nil {
+		bot.errorlog(err)
+		return
+	}
 }
 
 func (bot *Core) setupLogger() error {

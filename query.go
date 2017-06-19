@@ -193,7 +193,7 @@ func (bot *Core) ConnectionsReset() error {
 	}
 
 	bot.GuildMain = bot.Guilds[0]
-	bot.ChannelMain = bot.getMainChannel(bot.GuildMain.ID)
+	bot.ChannelMain = bot.GetMainChannel(bot.GuildMain.ID)
 
 	return nil
 }
