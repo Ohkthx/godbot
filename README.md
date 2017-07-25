@@ -16,5 +16,8 @@ The original can still be seen at the link above.
 + Expandable
 + Support for custom message handling functions
 
+### TODO
++ Delete N messages from channel.
+
 ### Versions
 see [changelog](https://github.com/d0x1p2/godbot/blob/master/changelog)

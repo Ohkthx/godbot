@@ -3,6 +3,7 @@ package godbot
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -104,21 +105,6 @@ func (bot *Core) ChannelLockCreate(cID string) (*ChannelLock, error) {
 
 		cl.Roles = append(cl.Roles, r)
 	}
-
-	/*
-		if strings.ToLower(r.Name) == "@everyone" {
-			f = true
-			cl.Role = r
-			cl.Allow = p.Allow
-			cl.Deny = p.Deny
-			cl.Permissions = r.Permissions
-			cl.Type = p.Type
-			return cl, nil
-		}
-		if f != true {
-			return nil, ErrNotFound
-		}
-	*/
 
 	return cl, nil
 
@@ -233,4 +219,43 @@ func (bot *Core) SetNickname(gID, name string, append bool) error {
 	}
 
 	return nil
+}
+
+// UserID turns a Username#Discriminator into an ID.
+func (bot *Core) UserID(name string) (string, error) {
+	s := bot.Session
+	uname := strings.Split(name, "#")
+	if len(uname) < 2 {
+		return "", fmt.Errorf("invalid name provided: %s", name)
+	}
+	for {
+		for _, g := range bot.Guilds {
+			var uID string
+
+			users, err := s.GuildMembers(g.ID, uID, 100)
+			if err != nil {
+				return "", err
+			}
+			ulen := len(users)
+			for n, u := range users {
+				uID = u.User.ID
+				if u.User.Username == uname[0] && u.User.Discriminator == uname[1] {
+					return uID, nil
+				}
+				if n+1 == ulen && ulen < 100 {
+					return "", fmt.Errorf("user not found")
+				}
+			}
+
+		}
+	}
+}
+
+// GuildsString converts the entire guild list into string format.
+func (bot *Core) GuildsString() string {
+	var ret = fmt.Sprintf("%20s -> %s\n", "Guild ID", "Guild Name")
+	for _, g := range bot.Guilds {
+		ret += fmt.Sprintf("%20s -> %s\n", g.ID, g.Name)
+	}
+	return ret
 }

@@ -10,7 +10,7 @@ import (
 
 // Error constants
 var (
-	_version      = "0.1.3"
+	_version      = "0.1.5"
 	ErrNilToken   = errors.New("token is not set")
 	ErrNilHandler = errors.New("message handler not assigned")
 )
@@ -30,6 +30,12 @@ func (bot *Core) MessageHandler(msgHandler func(*discordgo.Session, *discordgo.M
 func (bot *Core) NewUserHandler(userHandler func(*discordgo.Session, *discordgo.GuildMemberAdd)) {
 	bot.uah = userHandler
 	bot.uahAssigned = true
+}
+
+// RemUserHandler assigns a function to deal with leaving users.
+func (bot *Core) RemUserHandler(userHandler func(*discordgo.Session, *discordgo.GuildMemberRemove)) {
+	bot.urh = userHandler
+	bot.urhAssigned = true
 }
 
 // Start initiates the bot, attempts to connect to Discord.
@@ -64,6 +70,9 @@ func (bot *Core) Start() error {
 	bot.Session.AddHandler(bot.channelUpdated)
 
 	if bot.uahAssigned {
+		bot.Session.AddHandler(bot.uah)
+	}
+	if bot.urhAssigned {
 		bot.Session.AddHandler(bot.uah)
 	}
 
