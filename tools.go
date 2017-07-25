@@ -107,7 +107,6 @@ func (bot *Core) ChannelLockCreate(cID string) (*ChannelLock, error) {
 	}
 
 	return cl, nil
-
 }
 
 // ChannelLock will lock a channel preventing @everyone typing.

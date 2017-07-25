@@ -38,6 +38,12 @@ func (bot *Core) RemUserHandler(userHandler func(*discordgo.Session, *discordgo.
 	bot.urhAssigned = true
 }
 
+// GuildCreateHandler assigns a function to deal with newly create guilds.
+func (bot *Core) GuildCreateHandler(createHandler func(*discordgo.Session, *discordgo.GuildCreate)) {
+	bot.gah = createHandler
+	bot.gahAssigned = true
+}
+
 // Start initiates the bot, attempts to connect to Discord.
 func (bot *Core) Start() error {
 	var err error
@@ -74,6 +80,9 @@ func (bot *Core) Start() error {
 	}
 	if bot.urhAssigned {
 		bot.Session.AddHandler(bot.uah)
+	}
+	if bot.gahAssigned {
+		bot.Session.AddHandler(bot.gah)
 	}
 
 	err = bot.Session.Open()

@@ -36,9 +36,11 @@ type Core struct {
 	mhAssigned  bool
 	uahAssigned bool
 	urhAssigned bool
+	gahAssigned bool
 	mh          func(*discordgo.Session, *discordgo.MessageCreate)
 	uah         func(*discordgo.Session, *discordgo.GuildMemberAdd)
 	urh         func(*discordgo.Session, *discordgo.GuildMemberRemove)
+	gah         func(*discordgo.Session, *discordgo.GuildCreate)
 
 	// Logging for Errors.
 	muLog  sync.Mutex

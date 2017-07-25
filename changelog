@@ -1,5 +1,6 @@
 0.1.5 - Additions: 
             - GuildsString() to get all currently accessible guilds.
+            - GuildCreate handler.
 
 0.1.4 - Additions:
             - Channel updating if added, removed, modified.
