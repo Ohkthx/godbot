@@ -203,16 +203,17 @@ func (cl *ChannelLock) overwriteRole(oID string) (*discordgo.Role, error) {
 
 // SetNickname will set the current name of the bot to the guild.
 func (bot *Core) SetNickname(gID, name string, append bool) error {
+	var username = name
 	s := bot.Session
 	if gID == "" {
 		return ErrBadGuild
 	}
 
 	if append {
-		name = fmt.Sprintf("%s %s", bot.Username, name)
+		username = fmt.Sprintf("%s %s", bot.User.Username, name)
 	}
 
-	err := s.GuildMemberNickname(gID, bot.User.ID, name)
+	err := s.GuildMemberNickname(gID, "@me", username)
 	if err != nil {
 		return err
 	}
