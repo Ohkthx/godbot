@@ -1,3 +1,10 @@
+0.1.7 - Additions:
+            - GuildToSlice: Returns a slice of either Guild IDs or Guild Names.
+            - ChannelToSlice: Returns a slice of either Channel IDs or Channel Names.
+        Fixes:
+            - Updated to be compatible with recent discordgo.
+            - README.md updated.
+
 0.1.6 - Fixes:
             - Nickname changes now working correctly.
 

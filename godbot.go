@@ -10,7 +10,7 @@ import (
 
 // Error constants
 var (
-	_version      = "0.1.6"
+	_version      = "0.1.7"
 	ErrNilToken   = errors.New("token is not set")
 	ErrNilHandler = errors.New("message handler not assigned")
 )

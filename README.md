@@ -1,4 +1,5 @@
-### Discord Bot
+# Discord Bot
+
 + Discord API: [bwmarrin/discordgo](https://github.com/bwmarrin/discordgo)
 + MySQL Drivers: [my-sql-driver/mysql](https://github.com/go-sql-driver/mysql)
 + Vita-Nex: Core API [d0x1p2/vncgo](https://github.com/d0x1p2/vncgo)
@@ -11,13 +12,16 @@ After learning a fair bit about Go and using the Discord API bindings, I am maki
 
 The original can still be seen at the link above.
 
-### Features
+## Features
+
 + Easy to start up and stop
 + Expandable
 + Support for custom message handling functions
 
-### TODO
+## TODO
+
 + Delete N messages from channel.
 
 ### Versions
+
 see [changelog](https://github.com/d0x1p2/godbot/blob/master/changelog)

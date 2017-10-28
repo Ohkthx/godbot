@@ -29,6 +29,7 @@ type Core struct {
 	GuildMain   *discordgo.Guild
 	Guilds      []*discordgo.Guild
 
+	// Link map: [guild ID] []*Channels
 	Links   map[string][]*discordgo.Channel
 	Private []*discordgo.Channel
 

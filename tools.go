@@ -92,7 +92,7 @@ func (bot *Core) ChannelLockCreate(cID string) (*ChannelLock, error) {
 	cl.Channel = bot.GetChannel(cID)
 	cl.Guild = bot.GetGuild(cl.Channel.GuildID)
 
-	if cl.Channel.Type != "text" {
+	if cl.Channel.Type != 0 {
 		return nil, ErrBadChannel
 	}
 
@@ -258,4 +258,41 @@ func (bot *Core) GuildsString() string {
 		ret += fmt.Sprintf("%20s -> %s\n", g.ID, g.Name)
 	}
 	return ret
+}
+
+// GuildToSlice gives a list of current accessible Guild
+// infoType defaults to Guild ID, if infoType is set to "name" it will return names.
+// otherwise it will return the IDs.
+func (bot *Core) GuildToSlice(infoType string) (guilds []string) {
+	for _, g := range bot.Guilds {
+		if strings.ToLower(infoType) == "name" {
+			guilds = append(guilds, g.Name)
+		} else {
+			guilds = append(guilds, g.ID)
+		}
+	}
+	return
+}
+
+// ChannelToSlice grants a list of currently accessible channels for a particular guild.
+// By default, it will return a list of IDs. Giving "name" for infoType will return a list
+// of channel names.
+func (bot *Core) ChannelToSlice(guildID, infoType string) (channels []string) {
+	if guildID == "" {
+		return
+	}
+
+	// Make sure we have that guild ID in our links.
+	if _, ok := bot.Links[guildID]; !ok {
+		return
+	}
+
+	for _, c := range bot.Links[guildID] {
+		if strings.ToLower(infoType) == "name" {
+			channels = append(channels, c.Name)
+		} else {
+			channels = append(channels, c.ID)
+		}
+	}
+	return
 }
