@@ -1,3 +1,8 @@
+0.1.8 - Additions:
+            - Support for MessageUpdate events.
+        Fixes:
+            - Cleaned up variable names and remove unnecessary variables.
+
 0.1.7 - Additions:
             - GuildToSlice: Returns a slice of either Guild IDs or Guild Names.
             - ChannelToSlice: Returns a slice of either Channel IDs or Channel Names.

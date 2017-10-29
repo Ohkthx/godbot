@@ -10,7 +10,7 @@ import (
 
 // Error constants
 var (
-	_version      = "0.1.7"
+	_version      = "0.1.8"
 	ErrNilToken   = errors.New("token is not set")
 	ErrNilHandler = errors.New("message handler not assigned")
 )
@@ -20,28 +20,29 @@ func New(token string) (*Core, error) {
 	return &Core{Token: token}, nil
 }
 
-// MessageHandler assigns a function to handle messages.
-func (bot *Core) MessageHandler(msgHandler func(*discordgo.Session, *discordgo.MessageCreate)) {
-	bot.mh = msgHandler
-	bot.mhAssigned = true
+// MessageCreateHandler assigns a function to handle messages.
+func (bot *Core) MessageCreateHandler(msgHandler func(*discordgo.Session, *discordgo.MessageCreate)) {
+	bot.mch = msgHandler
 }
 
-// NewUserHandler assigns a function to deal with newly joining users.
-func (bot *Core) NewUserHandler(userHandler func(*discordgo.Session, *discordgo.GuildMemberAdd)) {
+// MessageUpdateHandler assigns a function to handle messages.
+func (bot *Core) MessageUpdateHandler(msgHandler func(*discordgo.Session, *discordgo.MessageUpdate)) {
+	bot.muh = msgHandler
+}
+
+// GuildMemberAddHandler assigns a function to deal with newly joining users.
+func (bot *Core) GuildMemberAddHandler(userHandler func(*discordgo.Session, *discordgo.GuildMemberAdd)) {
 	bot.uah = userHandler
-	bot.uahAssigned = true
 }
 
-// RemUserHandler assigns a function to deal with leaving users.
-func (bot *Core) RemUserHandler(userHandler func(*discordgo.Session, *discordgo.GuildMemberRemove)) {
+// GuildMemberRemoveHandler assigns a function to deal with leaving users.
+func (bot *Core) GuildMemberRemoveHandler(userHandler func(*discordgo.Session, *discordgo.GuildMemberRemove)) {
 	bot.urh = userHandler
-	bot.urhAssigned = true
 }
 
 // GuildCreateHandler assigns a function to deal with newly create guilds.
 func (bot *Core) GuildCreateHandler(createHandler func(*discordgo.Session, *discordgo.GuildCreate)) {
 	bot.gah = createHandler
-	bot.gahAssigned = true
 }
 
 // Start initiates the bot, attempts to connect to Discord.
@@ -50,7 +51,9 @@ func (bot *Core) Start() error {
 
 	if bot.Token == "" {
 		return ErrNilToken
-	} else if bot.mhAssigned == false {
+	} else if bot.mch != nil {
+		return ErrNilHandler
+	} else if bot.muh != nil {
 		return ErrNilHandler
 	}
 
@@ -67,21 +70,23 @@ func (bot *Core) Start() error {
 	// Ready callback for when application is ready.
 	bot.Session.AddHandler(bot.ready)
 
-	// Message handler for CreateMessage
-	bot.Session.AddHandler(bot.mh)
+	// Message handler for MessageCreate and MessageUpdate
+	bot.Session.AddHandler(bot.mch)
+	bot.Session.AddHandler(bot.muh)
 
 	// Handlers for channel changes
 	bot.Session.AddHandler(bot.channelCreated)
 	bot.Session.AddHandler(bot.channelDeleted)
 	bot.Session.AddHandler(bot.channelUpdated)
 
-	if bot.uahAssigned {
+	// Optional handlers.
+	if bot.uah != nil {
 		bot.Session.AddHandler(bot.uah)
 	}
-	if bot.urhAssigned {
+	if bot.urh != nil {
 		bot.Session.AddHandler(bot.uah)
 	}
-	if bot.gahAssigned {
+	if bot.gah != nil {
 		bot.Session.AddHandler(bot.gah)
 	}
 
