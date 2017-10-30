@@ -8,10 +8,10 @@ import (
 
 // Standard error messages
 var (
-	ErrNilGuilds   = errors.New("bot.guilds is nil")
-	ErrNilChannels = errors.New("bot.channels is nil")
-	ErrNilLinks    = errors.New("bot.links is nil")
-	ErrNotFound    = errors.New("not found")
+	ErrNilGuilds   = errors.New("godbot: bot.guilds is nil")
+	ErrNilChannels = errors.New("godbot: bot.channels is nil")
+	ErrNilLinks    = errors.New("godbot: bot.links is nil")
+	ErrNotFound    = errors.New("godbot: not found")
 )
 
 // Codes for types of Connections.

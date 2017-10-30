@@ -10,7 +10,7 @@ import (
 
 // Error constants
 var (
-	_version      = "0.1.8"
+	_version      = "0.1.9"
 	ErrNilToken   = errors.New("token is not set")
 	ErrNilHandler = errors.New("message handler not assigned")
 )
@@ -51,9 +51,9 @@ func (bot *Core) Start() error {
 
 	if bot.Token == "" {
 		return ErrNilToken
-	} else if bot.mch != nil {
+	} else if bot.mch == nil {
 		return ErrNilHandler
-	} else if bot.muh != nil {
+	} else if bot.muh == nil {
 		return ErrNilHandler
 	}
 
@@ -84,7 +84,7 @@ func (bot *Core) Start() error {
 		bot.Session.AddHandler(bot.uah)
 	}
 	if bot.urh != nil {
-		bot.Session.AddHandler(bot.uah)
+		bot.Session.AddHandler(bot.urh)
 	}
 	if bot.gah != nil {
 		bot.Session.AddHandler(bot.gah)

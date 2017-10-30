@@ -1,3 +1,7 @@
+0.1.9 - Fixes:
+            - Bad checks if handlers are assigned.
+            - Error messages now describing where they originate (godbot)
+
 0.1.8 - Additions:
             - Support for MessageUpdate events.
         Fixes:
