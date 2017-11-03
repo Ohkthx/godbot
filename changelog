@@ -1,3 +1,7 @@
+0.2.0 - Additions:
+            - Moved all handlers to their own file.
+            - Added handlers.
+
 0.1.9 - Fixes:
             - Bad checks if handlers are assigned.
             - Error messages now describing where they originate (godbot)

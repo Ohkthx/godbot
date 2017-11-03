@@ -10,7 +10,6 @@ import (
 // Core is the basic structure of the bot.
 type Core struct {
 	sync.Mutex
-	done     bool
 	muUpdate sync.Mutex
 	// User Information
 	User     *discordgo.User
@@ -21,6 +20,9 @@ type Core struct {
 
 	Stream bool
 	Game   string
+
+	// Ready channel
+	ready chan string
 
 	// Connection Information.
 	Session     *discordgo.Session
@@ -36,9 +38,16 @@ type Core struct {
 	// Message handling functions.
 	mch func(*discordgo.Session, *discordgo.MessageCreate)
 	muh func(*discordgo.Session, *discordgo.MessageUpdate)
-	uah func(*discordgo.Session, *discordgo.GuildMemberAdd)
-	urh func(*discordgo.Session, *discordgo.GuildMemberRemove)
-	gah func(*discordgo.Session, *discordgo.GuildCreate)
+
+	// Member handlers
+	gmah func(*discordgo.Session, *discordgo.GuildMemberAdd)
+	gmuh func(*discordgo.Session, *discordgo.GuildMemberUpdate)
+	gmrh func(*discordgo.Session, *discordgo.GuildMemberRemove)
+
+	// Guild handlers
+	gah  func(*discordgo.Session, *discordgo.GuildCreate)
+	gruh func(*discordgo.Session, *discordgo.GuildRoleUpdate)
+	grdh func(*discordgo.Session, *discordgo.GuildRoleDelete)
 
 	// Logging for Errors.
 	muLog  sync.Mutex
@@ -80,8 +89,4 @@ type ChannelLock struct {
 	Roles      []*discordgo.Role
 	Overwrites []*discordgo.PermissionOverwrite
 	Message    *discordgo.Message
-	//Type        string
-	//Allow       int
-	//Deny        int
-	//Permissions int
 }

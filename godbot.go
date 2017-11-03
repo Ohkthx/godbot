@@ -2,6 +2,7 @@ package godbot
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 
@@ -10,7 +11,7 @@ import (
 
 // Error constants
 var (
-	_version      = "0.1.9"
+	_version      = "0.1.10"
 	ErrNilToken   = errors.New("token is not set")
 	ErrNilHandler = errors.New("message handler not assigned")
 )
@@ -18,31 +19,6 @@ var (
 // New creates a new instance of the bot.
 func New(token string) (*Core, error) {
 	return &Core{Token: token}, nil
-}
-
-// MessageCreateHandler assigns a function to handle messages.
-func (bot *Core) MessageCreateHandler(msgHandler func(*discordgo.Session, *discordgo.MessageCreate)) {
-	bot.mch = msgHandler
-}
-
-// MessageUpdateHandler assigns a function to handle messages.
-func (bot *Core) MessageUpdateHandler(msgHandler func(*discordgo.Session, *discordgo.MessageUpdate)) {
-	bot.muh = msgHandler
-}
-
-// GuildMemberAddHandler assigns a function to deal with newly joining users.
-func (bot *Core) GuildMemberAddHandler(userHandler func(*discordgo.Session, *discordgo.GuildMemberAdd)) {
-	bot.uah = userHandler
-}
-
-// GuildMemberRemoveHandler assigns a function to deal with leaving users.
-func (bot *Core) GuildMemberRemoveHandler(userHandler func(*discordgo.Session, *discordgo.GuildMemberRemove)) {
-	bot.urh = userHandler
-}
-
-// GuildCreateHandler assigns a function to deal with newly create guilds.
-func (bot *Core) GuildCreateHandler(createHandler func(*discordgo.Session, *discordgo.GuildCreate)) {
-	bot.gah = createHandler
 }
 
 // Start initiates the bot, attempts to connect to Discord.
@@ -57,6 +33,9 @@ func (bot *Core) Start() error {
 		return ErrNilHandler
 	}
 
+	// Acknowledge the bot is starting.
+	fmt.Print("Bot: Core is attempting normal startup... ")
+
 	err = bot.setupLogger()
 	if err != nil {
 		return err
@@ -68,7 +47,9 @@ func (bot *Core) Start() error {
 	}
 
 	// Ready callback for when application is ready.
-	bot.Session.AddHandler(bot.ready)
+	bot.ready = make(chan string)
+	defer close(bot.ready) // Close the ready channel at the end of execution.
+	bot.Session.AddHandler(bot.readyHandler)
 
 	// Message handler for MessageCreate and MessageUpdate
 	bot.Session.AddHandler(bot.mch)
@@ -79,16 +60,15 @@ func (bot *Core) Start() error {
 	bot.Session.AddHandler(bot.channelDeleted)
 	bot.Session.AddHandler(bot.channelUpdated)
 
-	// Optional handlers.
-	if bot.uah != nil {
-		bot.Session.AddHandler(bot.uah)
-	}
-	if bot.urh != nil {
-		bot.Session.AddHandler(bot.urh)
-	}
-	if bot.gah != nil {
-		bot.Session.AddHandler(bot.gah)
-	}
+	// Member handlers
+	bot.Session.AddHandler(bot.gmah)
+	bot.Session.AddHandler(bot.gmuh)
+	bot.Session.AddHandler(bot.gmrh)
+
+	// Guild operation handlers
+	bot.Session.AddHandler(bot.gah)
+	bot.Session.AddHandler(bot.gruh)
+	bot.Session.AddHandler(bot.grdh)
 
 	err = bot.Session.Open()
 	if err != nil {
@@ -97,9 +77,16 @@ func (bot *Core) Start() error {
 		return err
 	}
 
-	for bot.done == false {
-		if bot.done == true {
+	// Wait for the ready to continue.
+	for msg := range bot.ready {
+		// If the message is ok, return nil
+		if msg == "ok" {
+			fmt.Println(msg)
 			break
+		} else {
+			// Something wrong happened, returning message.
+			fmt.Println("Failed.")
+			return errors.New(msg)
 		}
 	}
 
@@ -111,61 +98,6 @@ func (bot *Core) Stop() error {
 	//bot.Unlock()
 	bot.Session.Close()
 	return nil
-}
-
-func (bot *Core) ready(s *discordgo.Session, event *discordgo.Ready) {
-	//s := bot.session
-	bot.Lock()
-	defer bot.Unlock()
-
-	err := bot.UpdateConnections()
-	if err != nil {
-		bot.errorlog(err)
-		return
-	}
-
-	bot.User, err = s.User("@me")
-	if err != nil {
-		bot.errorlog(err)
-		return
-	}
-
-	bot.GuildMain = bot.Guilds[0]
-	bot.ChannelMain = bot.GetMainChannel(bot.GuildMain.ID)
-
-	if bot.Game != "" {
-		err = s.UpdateStatus(0, bot.Game)
-		if err != nil {
-			bot.errorlog(err)
-			return
-		}
-	}
-
-	bot.done = true
-}
-
-func (bot *Core) channelCreated(s *discordgo.Session, cc *discordgo.ChannelCreate) {
-	err := bot.UpdateConnections()
-	if err != nil {
-		bot.errorlog(err)
-		return
-	}
-}
-
-func (bot *Core) channelDeleted(s *discordgo.Session, cd *discordgo.ChannelDelete) {
-	err := bot.UpdateConnections()
-	if err != nil {
-		bot.errorlog(err)
-		return
-	}
-}
-
-func (bot *Core) channelUpdated(s *discordgo.Session, cu *discordgo.ChannelUpdate) {
-	err := bot.UpdateConnections()
-	if err != nil {
-		bot.errorlog(err)
-		return
-	}
 }
 
 func (bot *Core) setupLogger() error {

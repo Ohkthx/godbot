@@ -8,7 +8,7 @@ import (
 
 // Standard error messages
 var (
-	ErrNilGuilds   = errors.New("godbot: bot.guilds is nil")
+	ErrNilGuilds   = errors.New("godbot: bot.guilds is nil (bot may not be in guilds)")
 	ErrNilChannels = errors.New("godbot: bot.channels is nil")
 	ErrNilLinks    = errors.New("godbot: bot.links is nil")
 	ErrNotFound    = errors.New("godbot: not found")
@@ -26,7 +26,7 @@ const (
 func (bot *Core) GetConnections() (*Connections, error) {
 	err := bot.UpdateConnections()
 	if err != nil {
-		return nil, err
+		return &Connections{}, err
 	}
 
 	return &Connections{Links: bot.Links, Guilds: bot.Guilds, Channels: bot.Channels}, nil
