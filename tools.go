@@ -296,3 +296,110 @@ func (bot *Core) ChannelToSlice(guildID, infoType string) (channels []string) {
 	}
 	return
 }
+
+// ChannelMemoryDelete will remove a channel from the array of channels in memory.
+func (bot *Core) ChannelMemoryDelete(channel *discordgo.Channel) {
+	bot.muUpdate.Lock()
+	defer bot.muUpdate.Unlock()
+
+	if len(bot.Channels) <= 1 {
+		bot.Channels = nil
+	} else {
+		// Search the list of ALL channels.
+		for n, c := range bot.Channels {
+			// Find our channel...
+			if c.ID == channel.ID {
+				bot.Channels[n] = bot.Channels[len(bot.Channels)-1]
+				bot.Channels[len(bot.Channels)-1] = nil
+				bot.Channels = bot.Channels[:len(bot.Channels)-1]
+				break
+			}
+		}
+	}
+
+	if len(bot.Links[channel.GuildID]) <= 1 {
+		bot.Links[channel.GuildID] = nil
+	} else {
+		// Search links.
+		for n, c := range bot.Links[channel.GuildID] {
+			// Find our channel...
+			if c.ID == channel.ID {
+				bot.Links[channel.GuildID][n] = bot.Links[channel.GuildID][len(bot.Links[channel.GuildID])-1]
+				bot.Links[channel.GuildID][len(bot.Links[channel.GuildID])-1] = nil
+				bot.Links[channel.GuildID] = bot.Links[channel.GuildID][:len(bot.Links[channel.GuildID])-1]
+				break
+			}
+		}
+	}
+
+	return
+}
+
+// ChannelMemoryAdd will Add/Replace a channels structure in memory.
+func (bot *Core) ChannelMemoryAdd(channel *discordgo.Channel) {
+	bot.muUpdate.Lock()
+	defer bot.muUpdate.Unlock()
+
+	// Search the entire channels list, and modify or append.
+	var exists bool
+	for n, c := range bot.Channels {
+		if c.ID == channel.ID {
+			exists = true
+			bot.Channels[n] = channel
+			break
+		}
+	}
+
+	// Append it since it wasn't found.
+	if !exists {
+		bot.Channels = append(bot.Channels, channel)
+	}
+
+	exists = false
+	// Search our guild link and modify it.
+	for n, c := range bot.Links[channel.GuildID] {
+		if c.ID == channel.ID {
+			exists = true
+			bot.Links[channel.GuildID][n] = channel
+			break
+		}
+	}
+
+	// Wasn't discovered in our links, append it.
+	if !exists {
+		bot.Links[channel.GuildID] = append(bot.Links[channel.GuildID], channel)
+	}
+
+	return
+}
+
+// GetGuildMembers returns EVERY user in a guild.
+func (bot *Core) GetGuildMembers(guildID string, userAmount int) ([]*discordgo.Member, error) {
+	s := bot.Session
+	var usersAll []*discordgo.Member
+
+	var pullAmount int
+	var afterID string
+
+	for userAmount > 0 {
+		pullAmount = userAmount
+		if userAmount > 1000 {
+			pullAmount = 1000
+		}
+
+		users, err := s.GuildMembers(guildID, afterID, pullAmount)
+		if err != nil {
+			return nil, err
+		}
+
+		// Add it to our list.
+		for _, u := range users {
+			afterID = u.User.ID
+			usersAll = append(usersAll, u)
+		}
+
+		userAmount -= pullAmount
+	}
+
+	return usersAll, nil
+}

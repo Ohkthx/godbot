@@ -97,6 +97,7 @@ func (bot *Core) queryGuilds() error {
 	var err error
 	s := bot.Session
 
+	// TAG: TODO - support over 100 guilds.
 	guilds, err := s.UserGuilds(100, "", "")
 	if err != nil {
 		return err
@@ -126,13 +127,13 @@ func (bot *Core) queryGuilds() error {
 
 // queryChannels just updates the core.channels slices with current guilds.
 func (bot *Core) queryChannels() error {
-	var in bool
 	s := bot.Session
 
 	if bot.Guilds == nil {
 		return ErrNilGuilds
 	}
 
+	bot.Channels = nil
 	for _, g := range bot.Guilds {
 		channels, err := s.GuildChannels(g.ID)
 		if err != nil {
@@ -140,18 +141,7 @@ func (bot *Core) queryChannels() error {
 		}
 
 		for _, c := range channels {
-			in = false
-			if bot.Channels != nil {
-				for _, t := range bot.Channels {
-					if c.ID == t.ID {
-						in = true
-						break
-					}
-				}
-			}
-			if in == false {
-				bot.Channels = append(bot.Channels, c)
-			}
+			bot.Channels = append(bot.Channels, c)
 		}
 	}
 	return nil

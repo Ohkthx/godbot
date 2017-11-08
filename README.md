@@ -1,10 +1,8 @@
 # Discord Bot
 
 + Discord API: [bwmarrin/discordgo](https://github.com/bwmarrin/discordgo)
-+ MySQL Drivers: [my-sql-driver/mysql](https://github.com/go-sql-driver/mysql)
-+ Vita-Nex: Core API [d0x1p2/vncgo](https://github.com/d0x1p2/vncgo)
-+ Original: [d0x1p2/DiscordBot-go](https://github.com/d0x1p2/DiscordBot-go)
-+ Current: [d0x1p2/usmbot](https://github.com/d0x1p2/usmbot)
++ MongoDB Drivers: [go-mgo/mgo](https://github.com/go-mgo/mgo)
++ Current: [d0x1p2/SchiNET](https://github.com/d0x1p2/SchiNET)
 
 This is the second iteration of my Go based Discord bot. First attempt, although successful, quickly snowballed into a much larger project than expected.
 
@@ -17,10 +15,6 @@ The original can still be seen at the link above.
 + Easy to start up and stop
 + Expandable
 + Support for custom message handling functions
-
-## TODO
-
-+ Delete N messages from channel.
 
 ### Versions
 

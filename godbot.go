@@ -11,7 +11,7 @@ import (
 
 // Error constants
 var (
-	_version      = "0.1.10"
+	_version      = "0.2.0"
 	ErrNilToken   = errors.New("token is not set")
 	ErrNilHandler = errors.New("message handler not assigned")
 )
@@ -48,7 +48,6 @@ func (bot *Core) Start() error {
 
 	// Ready callback for when application is ready.
 	bot.ready = make(chan string)
-	defer close(bot.ready) // Close the ready channel at the end of execution.
 	bot.Session.AddHandler(bot.readyHandler)
 
 	// Message handler for MessageCreate and MessageUpdate
@@ -57,8 +56,20 @@ func (bot *Core) Start() error {
 
 	// Handlers for channel changes
 	bot.Session.AddHandler(bot.channelCreated)
-	bot.Session.AddHandler(bot.channelDeleted)
-	bot.Session.AddHandler(bot.channelUpdated)
+
+	// Channel Update Handler.
+	if bot.cuh != nil {
+		bot.Session.AddHandler(bot.cuh)
+	} else {
+		bot.Session.AddHandler(bot.channelUpdated)
+	}
+
+	// Channel Delete Handler.
+	if bot.cdh != nil {
+		bot.Session.AddHandler(bot.cdh)
+	} else {
+		bot.Session.AddHandler(bot.channelDeleted)
+	}
 
 	// Member handlers
 	bot.Session.AddHandler(bot.gmah)
@@ -96,6 +107,7 @@ func (bot *Core) Start() error {
 // Stop shuts down the bot.
 func (bot *Core) Stop() error {
 	//bot.Unlock()
+	close(bot.ready)
 	bot.Session.Close()
 	return nil
 }

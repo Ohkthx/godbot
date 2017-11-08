@@ -1,6 +1,15 @@
 0.2.0 - Additions:
             - Moved all handlers to their own file.
-            - Added handlers.
+            - ChannelUpdateHandler - Customized function for channel modification.
+            - ChannelDeleteHandler - Customized function for channel deletion.
+            - ChannelMemoryAdd - Adds/Replaces a channel represented in memory.
+            - ChannelMemoryDelete - Removes a channel represented in memory.
+            - GetGuildMembers - Get all guild members that are currently attached to a guild.
+        Fixes:
+            - Ready close moved to cleanup to prevent accessing nil on disconnection.
+            - Cleaned up variable names and remove unnecessary variables.
+            - queryChannels() logic updated to be more efficient 
+                AND work when a channel is modified.
 
 0.1.9 - Fixes:
             - Bad checks if handlers are assigned.

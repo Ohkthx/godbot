@@ -49,6 +49,10 @@ type Core struct {
 	gruh func(*discordgo.Session, *discordgo.GuildRoleUpdate)
 	grdh func(*discordgo.Session, *discordgo.GuildRoleDelete)
 
+	// Channel handlers
+	cuh func(*discordgo.Session, *discordgo.ChannelUpdate)
+	cdh func(*discordgo.Session, *discordgo.ChannelDelete)
+
 	// Logging for Errors.
 	muLog  sync.Mutex
 	errlog *log.Logger

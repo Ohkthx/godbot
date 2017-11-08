@@ -66,6 +66,16 @@ func (bot *Core) GuildCreateHandler(createHandler func(*discordgo.Session, *disc
 	bot.gah = createHandler
 }
 
+// ChannelUpdateHandler for any events that update a channel.
+func (bot *Core) ChannelUpdateHandler(channelHandler func(*discordgo.Session, *discordgo.ChannelUpdate)) {
+	bot.cuh = channelHandler
+}
+
+// ChannelDeleteHandler for an event where a channel is removed from a guild.
+func (bot *Core) ChannelDeleteHandler(channelHandler func(*discordgo.Session, *discordgo.ChannelDelete)) {
+	bot.cdh = channelHandler
+}
+
 // GuildRoleUpdateHandler will process new updates for guild roles.
 func (bot *Core) GuildRoleUpdateHandler(updateHandler func(*discordgo.Session, *discordgo.GuildRoleUpdate)) {
 	bot.gruh = updateHandler
