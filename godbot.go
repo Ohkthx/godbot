@@ -18,7 +18,7 @@ var (
 
 // New creates a new instance of the bot.
 func New(token string) (*Core, error) {
-	return &Core{Token: token}, nil
+	return &Core{Token: token, LiteMode: false}, nil
 }
 
 // Start initiates the bot, attempts to connect to Discord.
@@ -27,10 +27,12 @@ func (bot *Core) Start() error {
 
 	if bot.Token == "" {
 		return ErrNilToken
-	} else if bot.mch == nil {
-		return ErrNilHandler
-	} else if bot.muh == nil {
-		return ErrNilHandler
+	} else if !bot.LiteMode {
+		if bot.mch == nil {
+			return ErrNilHandler
+		} else if bot.muh == nil {
+			return ErrNilHandler
+		}
 	}
 
 	// Acknowledge the bot is starting.
@@ -48,38 +50,41 @@ func (bot *Core) Start() error {
 
 	// Ready callback for when application is ready.
 	bot.ready = make(chan string)
+	bot.Ready = nil
 	bot.Session.AddHandler(bot.readyHandler)
 
-	// Message handler for MessageCreate and MessageUpdate
-	bot.Session.AddHandler(bot.mch)
-	bot.Session.AddHandler(bot.muh)
+	if !bot.LiteMode {
+		// Message handler for MessageCreate and MessageUpdate
+		bot.Session.AddHandler(bot.mch)
+		bot.Session.AddHandler(bot.muh)
 
-	// Handlers for channel changes
-	bot.Session.AddHandler(bot.channelCreated)
+		// Handlers for channel changes
+		bot.Session.AddHandler(bot.channelCreated)
 
-	// Channel Update Handler.
-	if bot.cuh != nil {
-		bot.Session.AddHandler(bot.cuh)
-	} else {
-		bot.Session.AddHandler(bot.channelUpdated)
+		// Channel Update Handler.
+		if bot.cuh != nil {
+			bot.Session.AddHandler(bot.cuh)
+		} else {
+			bot.Session.AddHandler(bot.channelUpdated)
+		}
+
+		// Channel Delete Handler.
+		if bot.cdh != nil {
+			bot.Session.AddHandler(bot.cdh)
+		} else {
+			bot.Session.AddHandler(bot.channelDeleted)
+		}
+
+		// Member handlers
+		bot.Session.AddHandler(bot.gmah)
+		bot.Session.AddHandler(bot.gmuh)
+		bot.Session.AddHandler(bot.gmrh)
+
+		// Guild operation handlers
+		bot.Session.AddHandler(bot.gah)
+		bot.Session.AddHandler(bot.gruh)
+		bot.Session.AddHandler(bot.grdh)
 	}
-
-	// Channel Delete Handler.
-	if bot.cdh != nil {
-		bot.Session.AddHandler(bot.cdh)
-	} else {
-		bot.Session.AddHandler(bot.channelDeleted)
-	}
-
-	// Member handlers
-	bot.Session.AddHandler(bot.gmah)
-	bot.Session.AddHandler(bot.gmuh)
-	bot.Session.AddHandler(bot.gmrh)
-
-	// Guild operation handlers
-	bot.Session.AddHandler(bot.gah)
-	bot.Session.AddHandler(bot.gruh)
-	bot.Session.AddHandler(bot.grdh)
 
 	err = bot.Session.Open()
 	if err != nil {

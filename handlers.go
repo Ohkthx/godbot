@@ -33,7 +33,10 @@ func (bot *Core) readyHandler(s *discordgo.Session, event *discordgo.Ready) {
 		}
 	}
 
-	bot.ready <- "ok"
+	if bot.Ready == nil {
+		bot.Ready = event
+		bot.ready <- "ok"
+	}
 }
 
 // MessageCreateHandler assigns a function to handle messages.

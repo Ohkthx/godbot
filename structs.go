@@ -18,11 +18,13 @@ type Core struct {
 	ID       int
 	Token    string
 
-	Stream bool
-	Game   string
+	Stream   bool
+	Game     string
+	LiteMode bool // If it loads EVERYTHING.
 
 	// Ready channel
 	ready chan string
+	Ready *discordgo.Ready
 
 	// Connection Information.
 	Session     *discordgo.Session

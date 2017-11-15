@@ -1,3 +1,8 @@
+0.2.1 - Additions:
+            - LiteMode: skips adding handlers.
+            - Ready (struct) to pull user information.
+        Fixes:
+
 0.2.0 - Additions:
             - Moved all handlers to their own file.
             - ChannelUpdateHandler - Customized function for channel modification.
